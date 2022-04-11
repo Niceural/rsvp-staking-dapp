@@ -3,26 +3,28 @@ import * as backend from "./build/index.main.mjs";
 const stdlib = loadStdLib();
 
 const numberOfAttendees = 10;
-
 const startingBalance = stdlib.parseCurrency(100);
 
-const [accAlice, accBob] = await stdlib.newTestAccounts(2, startingBalance);
-console.log("Hello, Alice and Bob!");
+const accAdmin = await stdlib.newTestAccount(startingBalance);
+const accAttendeeArray = await Promise.all(
+  Array.from({ length: numberOfAttendees }, () =>
+    stdlib.newTestAccount(startingBalance)
+  )
+);
 
-console.log("Launching...");
-const ctcAlice = accAlice.contract(backend);
-const ctcBob = accBob.contract(backend, ctcAlice.getInfo());
+const ctcAdmin = accAdmin.contract(backend);
+const ctcInfo = ctcAdmin.getInfo();
 
-console.log("Starting backends...");
+const eventParameters = {
+  id: 657,
+  description: "This is a test event",
+  stakingMin: stdlib.parseCurrency(5),
+  sellingPeriod: 5,
+};
+
 await Promise.all([
-  backend.Alice(ctcAlice, {
-    ...stdlib.hasRandom,
-    // implement Alice's interact object here
-  }),
-  backend.Bob(ctcBob, {
-    ...stdlib.hasRandom,
-    // implement Bob's interact object here
+  backend.Admin(ctcAdmin, {
+    hasAttended: (addr) => console.log(``),
+    createEvent: () => eventParameters,
   }),
 ]);
-
-console.log("Goodbye, Alice and Bob!");

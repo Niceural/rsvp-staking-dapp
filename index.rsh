@@ -1,19 +1,42 @@
-'reach 0.1';
+"reach 0.1";
+//'use strict';
 
-export const main = Reach.App(() => {
-  const A = Participant('Alice', {
-    // Specify Alice's interact interface here
-  });
-  const B = Participant('Bob', {
-    // Specify Bob's interact interface here
-  });
-  init();
-  // The first one to publish deploys the contract
-  A.publish();
-  commit();
-  // The second one to publish always attaches
-  B.publish();
-  commit();
-  // write your program here
-  exit();
-});
+const CommonInterface = { hasAttended: Fun([Address, Bool], Null) };
+
+const AdminInterface = {
+  ...CommonInterface,
+  createEvent: Fun(
+    [],
+    Object({
+      id: UInt,
+      description: Bytes(32),
+      stakingMin: UInt,
+      sellingPeriod: UInt,
+    })
+  ),
+};
+
+const AttendeeInterface = { ...CommonInterface };
+
+export const main = Reach.App(
+  {},
+  [
+    Participant("Admin", AdminInterface),
+    ParticipantClass("Attendee", AttendeeInterface),
+  ],
+  (Admin, Attendee) => {
+    const hasAttended = (who) =>
+    each([Admin, Attendee], () => {
+      interact.hasAttended
+    })
+    Admin.only(() => {
+      const { id, description, stakingMin, sellingPeriod } = declassify(
+        interact.createEvent()
+      );
+    });
+    Admin.publish(id, description, stakingMin, sellingPeriod);
+
+    // allow Attendees to purchase tickets until deadline is met
+    const []
+  }
+);
